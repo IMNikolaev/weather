@@ -109,6 +109,7 @@ fetchData()
                 setTimeout(() => {
                     document.getElementById("loader").style.display = "none";
                 const weatherDataElement = document.getElementById("weather-data");
+                weatherDataElement.style.display = "block";
                 weatherDataElement.innerHTML = `<h2>${city ? city + ', ' : ''}${country}</h2>`;
                 if (temperature !== undefined) {
                     weatherDataElement.innerHTML += `<p>Температура: ${temperature} °C</p>`;
