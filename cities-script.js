@@ -46,6 +46,7 @@ async function fetchWeather(latitude, longitude) {
         return {};
     }
 }
+
 function interpretWeatherCode(code) {
     switch (code) {
         case 0:
@@ -94,32 +95,26 @@ function interpretWeatherCode(code) {
     }
 }
 
-fetchData()
-    .then(data => {
-        const latitude = data.latitude;
-        const longitude = data.longitude;
-        const city = data.city;
-        const country = data.country;
-        fetchWeather(latitude, longitude)
-            .then(data => {
-                const temperature =data.temperature;
-                const windspeed = data.windspeed;
-                const weathercode =data.weathercode;
-                const weatherDescription = interpretWeatherCode(weathercode);
-                setTimeout(() => {
-                    document.getElementById("loader").style.display = "none";
-                    const weatherDataElement = document.getElementById("weather-data");
-                    weatherDataElement.style.display = "block";
-                    weatherDataElement.innerHTML = `<h2>${city ? city + ', ' : ''}${country}</h2>`;
-                    if (temperature !== undefined) {
-                        weatherDataElement.innerHTML += `<p>Температура: ${temperature} °C</p>`;
-                    }
-                    if (windspeed !== undefined) {
-                        weatherDataElement.innerHTML += `<p>Скорость ветра: ${windspeed} км/ч</p>`;
-                    }
-                    if (weatherDescription !== undefined) {
-                        weatherDataElement.innerHTML += `<p>Описание погоды: ${weatherDescription}</p>`;
-                    }
-                }, 1500);
-            });
-    });
+async function renderWeatherCards() {
+    const citiesContainer = document.getElementById('cities');
+    try {
+        const data = await fetch('cities.json').then(response => response.json());
+        for (const cityData of data) {
+            const weatherData = await fetchWeather(cityData.latitude, cityData.longitude);
+            const weatherCard = document.createElement('div');
+            weatherCard.classList.add('weather-card');
+            weatherCard.innerHTML = `
+                <h2>${cityData.city}</h2>
+                <p>Температура: ${weatherData.temperature} °C</p>
+                <p>Скорость ветра: ${weatherData.windspeed} км/ч</p>
+                <p>Описание погоды: ${interpretWeatherCode(weatherData.weathercode)}</p>
+            `;
+            citiesContainer.appendChild(weatherCard);
+            document.getElementById("loader").style.display = "none";
+        }
+    } catch (error) {
+        console.error('Произошла ошибка:', error);
+    }
+}
+
+renderWeatherCards();
